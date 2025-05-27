@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "wetalk-da0e0"
+  },
+  "targets": {
+    "wetalk-da0e0": {
+      "hosting": {
+        "paulgraham": [
+          "paulgraham"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

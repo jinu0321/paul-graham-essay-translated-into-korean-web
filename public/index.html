@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <title>Paul Graham 에세이 한글번역 컬렉션</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont,
+                    "Segoe UI", Roboto, sans-serif;
+                background: #0a0a0a;
+                color: #e0e0e0;
+                line-height: 1.6;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .container {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                padding: 20px;
+                text-align: center;
+                border-bottom: 2px solid #333;
+            }
+
+            .header h1 {
+                color: #64b5f6;
+                font-size: 1.8rem;
+                font-weight: 600;
+                margin-bottom: 5px;
+            }
+
+            .header p {
+                color: #aaa;
+                font-size: 0.9rem;
+            }
+
+            .content {
+                flex: 1;
+                padding: 30px;
+                overflow-y: auto;
+                display: flex;
+                justify-content: center;
+            }
+
+            .essay-list {
+                max-width: 600px;
+                width: 100%;
+                padding-bottom: calc(30px + env(safe-area-inset-bottom, 20px));
+            }
+
+            .essay-item {
+                background: #1a1a1a;
+                border: 2px solid #333;
+                border-radius: 12px;
+                margin-bottom: 15px;
+                padding: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .essay-item:hover {
+                border-color: #64b5f6;
+                background: #222;
+                transform: translateY(-2px);
+            }
+
+            .essay-item.selected {
+                border-color: #64b5f6;
+                background: #1e2a3a;
+            }
+
+            .essay-title {
+                font-size: 1.3rem;
+                font-weight: 600;
+                color: #fff;
+                margin-bottom: 8px;
+            }
+
+            .essay-subtitle {
+                font-size: 1rem;
+                color: #aaa;
+                font-style: italic;
+                margin-bottom: 5px;
+            }
+
+            .essay-date {
+                font-size: 0.85rem;
+                color: #888;
+                font-weight: 500;
+            }
+
+            .essay-content {
+                max-width: 800px;
+                width: 100%;
+                background: #1a1a1a;
+                border-radius: 12px;
+                padding: 30px;
+                padding-bottom: calc(30px + env(safe-area-inset-bottom));
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            }
+
+            .progress-bar {
+                background: #333;
+                height: 4px;
+                border-radius: 2px;
+                margin-bottom: 20px;
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                background: linear-gradient(90deg, #64b5f6, #42a5f5);
+                height: 100%;
+                transition: width 0.3s ease;
+            }
+
+            .progress-text {
+                text-align: center;
+                color: #aaa;
+                font-size: 0.9rem;
+                margin-bottom: 25px;
+            }
+
+            .paragraph-section {
+                margin-bottom: 30px;
+            }
+
+            .paragraph-label {
+                font-size: 0.9rem;
+                color: #64b5f6;
+                font-weight: 600;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+            }
+
+            .paragraph-label::before {
+                content: "";
+                width: 20px;
+                height: 20px;
+                margin-right: 8px;
+                border-radius: 50%;
+                background: #64b5f6;
+                display: inline-block;
+            }
+
+            .paragraph-text {
+                background: #0f0f0f;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #64b5f6;
+                white-space: pre-wrap;
+                line-height: 1.8;
+            }
+
+            .controls {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 25px;
+                padding-top: 20px;
+                padding-bottom: env(safe-area-inset-bottom, 20px);
+                border-top: 1px solid #333;
+            }
+
+            .btn {
+                background: linear-gradient(135deg, #1976d2, #1565c0);
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                font-size: 0.9rem;
+            }
+
+            .btn:hover {
+                background: linear-gradient(135deg, #1565c0, #0d47a1);
+                transform: translateY(-2px);
+            }
+
+            .btn:disabled {
+                background: #555;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .btn-back {
+                background: linear-gradient(135deg, #424242, #212121);
+            }
+
+            .btn-back:hover {
+                background: linear-gradient(135deg, #616161, #424242);
+            }
+
+            .navigation-hint {
+                text-align: center;
+                color: #666;
+                font-size: 0.8rem;
+                margin-top: 15px;
+                padding-bottom: env(safe-area-inset-bottom, 15px);
+            }
+
+            .essay-header {
+                text-align: center;
+                margin-bottom: 25px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #333;
+            }
+
+            .essay-title-display {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #64b5f6;
+                margin-bottom: 10px;
+            }
+
+            .essay-subtitle-display {
+                font-size: 1.1rem;
+                color: #aaa;
+                font-style: italic;
+                margin-bottom: 8px;
+            }
+
+            .essay-date-display {
+                font-size: 0.9rem;
+                color: #888;
+                font-weight: 500;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            /* 스크롤바 스타일링 */
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: #1a1a1a;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #555;
+                border-radius: 4px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #777;
+            }
+
+            /* 반응형 디자인 */
+            @media (max-width: 768px) {
+                .content {
+                    padding: 15px;
+                    padding-bottom: calc(15px + env(safe-area-inset-bottom, 20px));
+                }
+
+                .essay-list {
+                    padding-bottom: calc(30px + env(safe-area-inset-bottom, 30px));
+                }
+
+                .essay-content {
+                    padding: 20px;
+                    padding-bottom: calc(20px + env(safe-area-inset-bottom, 30px));
+                }
+
+                .header h1 {
+                    font-size: 1.5rem;
+                }
+
+                .controls {
+                    flex-direction: column;
+                    gap: 10px;
+                    padding-bottom: calc(20px + env(safe-area-inset-bottom, 20px));
+                }
+
+                .navigation-hint {
+                    padding-bottom: calc(15px + env(safe-area-inset-bottom, 20px));
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📚 Paul Graham 에세이 한글번역 컬렉션</h1>
+                <p>스타트업과 창업에 대한 통찰</p>
+            </div>
+
+            <div class="content">
+                <!-- 에세이 목록 화면 -->
+                <div id="essay-list-screen" class="essay-list">
+                    <!-- 동적으로 생성될 에세이 목록 -->
+                </div>
+
+                <!-- 에세이 읽기 화면 -->
+                <div id="essay-reader-screen" class="essay-content hidden">
+                    <div id="essay-header" class="essay-header">
+                        <h2
+                            id="essay-title-display"
+                            class="essay-title-display"
+                        ></h2>
+                        <p
+                            id="essay-subtitle-display"
+                            class="essay-subtitle-display"
+                        ></p>
+                        <p
+                            id="essay-date-display"
+                            class="essay-date-display"
+                        ></p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">1 / 1</div>
+
+                    <div class="paragraph-section">
+                        <div class="paragraph-label">🇺🇸 English:</div>
+                        <div class="paragraph-text" id="english-text"></div>
+                    </div>
+
+                    <div class="paragraph-section">
+                        <div class="paragraph-label">🇰🇷 한국어:</div>
+                        <div class="paragraph-text" id="korean-text"></div>
+                    </div>
+
+                    <div class="controls">
+                        <button class="btn btn-back" id="back-btn">
+                            ← 목록으로
+                        </button>
+                        <div>
+                            <button class="btn" id="prev-btn">← 이전</button>
+                            <button class="btn" id="next-btn">다음 →</button>
+                        </div>
+                    </div>
+
+                    <div class="navigation-hint">
+                        키보드: ← → 화살표로 이동, ESC로 목록으로 돌아가기
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="module">
+            // 에세이 모듈들을 동적으로 import
+            const essayModules = await Promise.all([
+                import("./essays_js/do_things_that_dont_scale.js"),
+                import("./essays_js/startup_equals_growth.js"),
+                import("./essays_js/default_alive_or_default_dead.js"),
+                import("./essays_js/ramen_profitable.js"),
+                import("./essays_js/the_18_mistakes_that_kill_startups.js"),
+                import("./essays_js/before_the_startup.js"),
+                import("./essays_js/what_we_look_for_in_founders.js"),
+                import("./essays_js/a_word_to_the_resourceful.js"),
+                import("./essays_js/the_top_idea_in_your_mind.js"),
+            ]);
+
+            // 에세이 데이터 구성
+            const essays = {};
+
+            essayModules.forEach((module, index) => {
+                const essayKeys = [
+                    "do_things_that_dont_scale",
+                    "startup_equals_growth",
+                    "default_alive_or_default_dead",
+                    "ramen_profitable",
+                    "the_18_mistakes_that_kill_startups",
+                    "before_the_startup",
+                    "what_we_look_for_in_founders",
+                    "a_word_to_the_resourceful",
+                    "the_top_idea_in_your_mind",
+                ];
+                const key = essayKeys[index];
+
+                essays[key] = {
+                    title: module.title,
+                    korean_title: module.korean_title,
+                    date: module.date,
+                    data: module.essay_data,
+                };
+            });
+
+            // 현재 상태
+            let currentEssay = null;
+            let currentParagraph = 0;
+            let selectedIndex = 0;
+
+            // DOM 요소들
+            const essayListScreen =
+                document.getElementById("essay-list-screen");
+            const essayReaderScreen = document.getElementById(
+                "essay-reader-screen"
+            );
+            const progressFill = document.getElementById("progress-fill");
+            const progressText = document.getElementById("progress-text");
+            const englishText = document.getElementById("english-text");
+            const koreanText = document.getElementById("korean-text");
+            const backBtn = document.getElementById("back-btn");
+            const prevBtn = document.getElementById("prev-btn");
+            const nextBtn = document.getElementById("next-btn");
+
+            // 초기화
+            function init() {
+                generateEssayList();
+                updateSelection();
+                setupEventListeners();
+            }
+
+            // 에세이 목록 동적 생성
+            function generateEssayList() {
+                const essayListScreen =
+                    document.getElementById("essay-list-screen");
+                essayListScreen.innerHTML = "";
+
+                Object.keys(essays).forEach((key) => {
+                    const essay = essays[key];
+                    const essayItem = document.createElement("div");
+                    essayItem.className = "essay-item";
+                    essayItem.dataset.essay = key;
+
+                    essayItem.innerHTML = `
+                        <div class="essay-title">${essay.korean_title}</div>
+                        <div class="essay-subtitle">${essay.title}</div>
+                        <div class="essay-date">${essay.date}</div>
+                    `;
+
+                    essayListScreen.appendChild(essayItem);
+                });
+            }
+
+            // 이벤트 리스너 설정
+            function setupEventListeners() {
+                // 에세이 아이템 클릭 (동적 생성된 요소들에 대해)
+                essayListScreen.addEventListener("click", (e) => {
+                    const essayItem = e.target.closest(".essay-item");
+                    if (essayItem) {
+                        const essayItems =
+                            document.querySelectorAll(".essay-item");
+                        selectedIndex =
+                            Array.from(essayItems).indexOf(essayItem);
+                        updateSelection();
+                        openEssay(essayItem.dataset.essay);
+                    }
+                });
+
+                // 버튼 클릭
+                backBtn.addEventListener("click", showEssayList);
+                prevBtn.addEventListener("click", previousParagraph);
+                nextBtn.addEventListener("click", nextParagraph);
+
+                // 키보드 이벤트
+                document.addEventListener("keydown", handleKeyPress);
+            }
+
+            // 키보드 이벤트 처리
+            function handleKeyPress(e) {
+                if (essayListScreen.classList.contains("hidden")) {
+                    // 에세이 읽기 화면에서
+                    switch (e.key) {
+                        case "ArrowLeft":
+                            e.preventDefault();
+                            previousParagraph();
+                            break;
+                        case "ArrowRight":
+                            e.preventDefault();
+                            nextParagraph();
+                            break;
+                        case "Escape":
+                            e.preventDefault();
+                            showEssayList();
+                            break;
+                    }
+                } else {
+                    // 에세이 목록 화면에서
+                    const essayItems = document.querySelectorAll(".essay-item");
+                    switch (e.key) {
+                        case "ArrowUp":
+                            e.preventDefault();
+                            selectedIndex = Math.max(0, selectedIndex - 1);
+                            updateSelection();
+                            break;
+                        case "ArrowDown":
+                            e.preventDefault();
+                            selectedIndex = Math.min(
+                                essayItems.length - 1,
+                                selectedIndex + 1
+                            );
+                            updateSelection();
+                            break;
+                        case "Enter":
+                            e.preventDefault();
+                            openEssay(essayItems[selectedIndex].dataset.essay);
+                            break;
+                    }
+                }
+            }
+
+            // 선택 상태 업데이트
+            function updateSelection() {
+                const essayItems = document.querySelectorAll(".essay-item");
+                essayItems.forEach((item, index) => {
+                    item.classList.toggle("selected", index === selectedIndex);
+                });
+            }
+
+            // 에세이 열기
+            function openEssay(essayKey) {
+                currentEssay = essays[essayKey];
+                currentParagraph = 0;
+
+                // 에세이 헤더 정보 업데이트
+                document.getElementById("essay-title-display").textContent =
+                    currentEssay.korean_title;
+                document.getElementById("essay-subtitle-display").textContent =
+                    currentEssay.title;
+                document.getElementById("essay-date-display").textContent =
+                    currentEssay.date;
+
+                essayListScreen.classList.add("hidden");
+                essayReaderScreen.classList.remove("hidden");
+
+                updateParagraph();
+            }
+
+            // 에세이 목록으로 돌아가기
+            function showEssayList() {
+                essayListScreen.classList.remove("hidden");
+                essayReaderScreen.classList.add("hidden");
+                currentEssay = null;
+            }
+
+            // 문단 업데이트
+            function updateParagraph() {
+                if (!currentEssay) return;
+
+                const paragraph = currentEssay.data[currentParagraph];
+                const totalParagraphs = currentEssay.data.length;
+
+                // 텍스트 업데이트
+                englishText.textContent = paragraph.english;
+                koreanText.textContent = paragraph.korean;
+
+                // 진행률 업데이트
+                const progress =
+                    ((currentParagraph + 1) / totalParagraphs) * 100;
+                progressFill.style.width = `${progress}%`;
+                progressText.textContent = `${
+                    currentParagraph + 1
+                } / ${totalParagraphs}`;
+
+                // 버튼 상태 업데이트
+                prevBtn.disabled = currentParagraph === 0;
+                nextBtn.disabled = currentParagraph === totalParagraphs - 1;
+            }
+
+            // 이전 문단
+            function previousParagraph() {
+                if (currentParagraph > 0) {
+                    currentParagraph--;
+                    updateParagraph();
+                }
+            }
+
+            // 다음 문단
+            function nextParagraph() {
+                if (currentParagraph < currentEssay.data.length - 1) {
+                    currentParagraph++;
+                    updateParagraph();
+                }
+            }
+
+            // 초기화 실행
+            init();
+        </script>
+    </body>
+</html>
